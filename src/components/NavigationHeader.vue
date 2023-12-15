@@ -1,20 +1,17 @@
-
-
 <script>
 export default {
   name: "NavigationHeader",
-  components: {
-   
-  }
 };
+
 </script>
+
 <template>
   <div class="header-body">
     <nav class="header-content">
       <ul>
         <li><router-link to="/team">Team Selection</router-link></li>
-        <li><router-link to="/roster">Roster</router-link></li>
-        <li><router-link to="/schedule">Schedule</router-link></li>
+        <li><router-link :to="{ name: 'roster', params: { selectedTeamName: `${$route.params.selectedTeamName ?? 'no-team'}` }}">Roster</router-link></li>
+        <li><router-link :to="{ name: 'schedule', params:  { selectedTeamName: `${$route.params.selectedTeamName ?? 'no-team'}` }}">Schedule</router-link></li>
       </ul>
     </nav>
   </div>

@@ -4,7 +4,7 @@ class PlayerDAO {
   async getPlayerByTeamId(teamId) {
     console.log('Get players by team id: ' + teamId);
     try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const response = await api.get('/players/team/' + teamId);
       return response.data;
     } catch (error) {

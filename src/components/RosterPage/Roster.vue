@@ -3,6 +3,7 @@ import PlayerContainer from "../RosterPage/PlayersConteiner.vue";
 import CoachConteiner from "../RosterPage/CoachConteiner.vue";
 import PlayerDAO from "../../Services/playerDAO.js";
 import CoachDAO from "../../Services/coachDAO.js";
+import TeamDAO from "../../Services/teamDAO.js";
 import { mapState } from 'vuex';
 
 
@@ -11,6 +12,9 @@ export default {
   components: {
     PlayerContainer,
     CoachConteiner,
+  },
+  props: {
+    selectedTeamName: String, // Declare selectedTeamName as a prop
   },
   data() {
     return {
@@ -24,18 +28,24 @@ export default {
     ...mapState(['isLoading']),
   },
   created() {
-    // Set isLoading to true
-    this.$store.commit('startLoading');
+    // Wait for the team data to be fetched
+    this.fetchTeam()
+      .then(() => {
+        // Set isLoading to true
+        this.$store.commit('startLoading');
+        // Simulate an asynchronous operation (e.g., fetching data)
+        this.fetchPlayersByTeamId(this.team.id);
+        this.fetchCoachByTeamId(this.team.id);
 
-    // Simulate an asynchronous operation (e.g., fetching data)
-    this.fetchPlayersByTeamId(1);
-    this.fetchCoachByTeamId(1);
-
-    // Simulate the completion of the asynchronous operation
-    // by setting isLoading to false after a delay (adjust as needed)
-    setTimeout(() => {
-      this.$store.commit('stopLoading');
-    }, 2000); // Adjust the delay as needed
+        // Simulate the completion of the asynchronous operation
+        // by setting isLoading to false after a delay (adjust as needed)
+        setTimeout(() => {
+          this.$store.commit('stopLoading');
+        }, 2000); // Adjust the delay as needed
+      })
+      .catch((error) => {
+        console.error("Error fetching team:", error);
+      });
   },
   methods: {
     async fetchPlayersByTeamId(teamId) {
@@ -45,6 +55,10 @@ export default {
     async fetchCoachByTeamId(teamId) {
       await new Promise(resolve => setTimeout(resolve, 2000));
       this.coach = await CoachDAO.getCoachByTeamId(teamId);
+    },
+    async fetchTeam() {
+      //await new Promise(resolve => setTimeout(resolve, 2000));
+      this.team = await TeamDAO.getTeamByName(this.selectedTeamName);
     },
     filterPlayersByPosition(position) {
       if (position === "All players") {

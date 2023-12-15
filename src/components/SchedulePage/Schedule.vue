@@ -1,45 +1,89 @@
 <script>
-
-import MatchesContainer from "./MatchesContainer.vue"
+import TeamDAO from "@/Services/teamDAO";
+import MatchesContainer from "./MatchesContainer.vue";
 import MatchDAO from "@/Services/matchDAO";
-
 
 export default {
   name: "SchedulePage",
-  data () {
+  data() {
     return {
       matches: [],
+      team: null, // Initialize team as null
+      sortKey: null, // Variable to keep track of the current sort key
+      sortAscending: true,
     };
+  },
+  props: {
+    selectedTeamName: String, // Declare selectedTeamName as a prop
   },
   components: {
     MatchesContainer,
   },
-  created() {
-  this.fetchMatchesByTeamId(1);
-},
+  async created() {
+    await this.fetchTeam(); // Wait for the team data to be fetched
+    this.fetchMatchesByTeamId(this.team.id);
+  },
+  computed: {
+    sortedMatches() {
+      // Create a copy of the matches array to avoid modifying the original array
+      let sortedMatches = [...this.matches];
+
+      // Sort the matches based on the selected key and order
+      if (this.sortKey) {
+        sortedMatches.sort((a, b) => {
+          const valueA = a[this.sortKey];
+          const valueB = b[this.sortKey];
+
+          // Check if the values are strings (e.g., for location and status)
+          if (typeof valueA === 'string') {
+            return this.sortAscending
+              ? valueA.localeCompare(valueB)
+              : valueB.localeCompare(valueA);
+          }
+
+          // For other types, assume numeric comparison (e.g., for time)
+          return this.sortAscending ? valueA - valueB : valueB - valueA;
+        });
+      }
+
+      return sortedMatches;
+    },
+  },
   methods: {
     async fetchMatchesByTeamId(teamId) {
       //await new Promise(resolve => setTimeout(resolve, 2000));
       this.matches = await MatchDAO.getMatchesByTeamId(teamId);
     },
+
+    async fetchTeam() {
+      //await new Promise(resolve => setTimeout(resolve, 2000));
+      this.team = await TeamDAO.getTeamByName(this.selectedTeamName);
+    },
+    sortMatches(key) {
+      // If the same key is clicked, toggle the sort order; otherwise, set the order to ascending
+      this.sortAscending = key === this.sortKey ? !this.sortAscending : true;
+
+      // Update the sort key
+      this.sortKey = key;
+    },
   },
-}
+};
 </script>
 <template>
   <div>
     <h1>Schedule</h1>
     <div id="sort-bar" class="sort-bar">
       <span>Sort by : </span>
-      <a  class="sort" title="Sort by Time">Time ⇵</a>
-      <a  class="sort" title="Sort by Location">Location ⇵</a>
-      <a  class="sort" title="Sort by Status">Status ⇵</a>
+      <a @click="sortMatches('startTime')" class="sort" title="Sort by Time">Time ⇵</a>
+      <a @click="sortMatches('location')" class="sort" title="Sort by Location">Location ⇵</a>
+      <a @click="sortMatches('status')" class="sort" title="Sort by Status">Status ⇵</a>
 
     </div>
     <div class="schedule-container">
       <div class="matches-spacing-container">
         <h2>Result</h2>
         <template v-if="matches && matches.length > 0">
-          <MatchesContainer :matches="matches" />
+          <MatchesContainer :matches="sortedMatches" />
         </template>
         <template v-else>
           <p class="no-matches-message">Matches are Not Available</p>

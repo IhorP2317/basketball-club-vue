@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div>
     <NavigationHeader>
     </NavigationHeader>
     <router-view />
@@ -7,9 +7,10 @@
 </template>
 
 <script>
-import NavigationHeader from './components/NavigationHeader.vue';
+import NavigationHeader from "@/components/NavigationHeader.vue";
 
 export default {
+  name: "App",
   components: {
     NavigationHeader,
   },

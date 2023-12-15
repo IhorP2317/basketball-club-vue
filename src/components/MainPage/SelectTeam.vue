@@ -16,11 +16,10 @@ export default {
 
       if (exists) {
         this.selectedTeamName = this.teamName;
-        alert("Team selected successfully!");
-        // Clear the input field if needed
-        // this.teamName = null;
+        this.$router.push({ name: 'roster', params: { selectedTeamName: this.teamName } });
       } else {
         alert("This team does not exist! Select another team.");
+        this.selectedTeamName = null;
       }
     },
   },
